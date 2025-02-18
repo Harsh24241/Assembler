@@ -1,32 +1,38 @@
 import re
 
 class Rtype:
-    encoding={}
-    def __inti__(self,line ):
-        pass
+    encoding={f"x{i}": format(i, '05b') for i in range(0,32)}
+    
+    f3={"add":"000","sub":"000","and":"010","or":"101","slt":"110","srl":"111"}
+    f7={"add":"0000000","sub":"0100000","and":"0000000","or":"0000000","slt":"0000000","srl":"0000000"}
+    def __init__(self,line ):
+        self.inst=line
     def code(self):
-        pass
+        l = re.split(r'[ ,]+', self.inst)
+        out=f"{self.f7[l[0]]} {self.encoding[l[3]]} {self.encoding[l[2]]} {self.f3[l[0]]} {self.encoding[l[1]]} 0110011"
+        return out
+        
 class Itype:
     encoding={}
-    def __inti__(self,line ):
+    def __init__(self,line ):
         pass
     def code(self):
         pass
 class Ltype:
     encoding={}
-    def __inti__(self,line ):
+    def __init__(self,line ):
         pass
     def code(self):
         pass
 class Btype:
     encoding={}
-    def __inti__(self,line ):
+    def __init__(self,line ):
         pass
     def code(self):
         pass
 class Jtype:
     encoding={}
-    def __inti__(self,line ):
+    def __init__(self,line ):
         pass
     def code(self):
         pass
@@ -79,8 +85,15 @@ def read_assembly(filename):
 
     errors=debug(l)
     for i in errors:print(i)
-    print(l)
-read_assembly("Ex_test_4.txt")
+    if(len(errors)>0):exit()
+    ans=""
+    for i in l:
+        if(identity(i)=="R"):
+            a=Rtype(i)
+            ans+=a.code()
+    print(ans,":binary code")
+
+read_assembly("test.txt")
 
 
 
