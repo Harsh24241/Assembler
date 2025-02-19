@@ -85,8 +85,11 @@ class Btype(Instruction):
     opcode = "1100011"
     def code(self):
         tokens = re.split(r'[ ,]+', self.inst)
-        rs1, rs2, label = tokens[1], tokens[2], tokens[3]
-        imm = self.labels[label] - self.current_pc
+        rs1, rs2, offset = tokens[1], tokens[2], tokens[3]
+        if offset in self.labels:
+            imm = self.labels[offset] - self.current_pc
+        else:
+            imm = int(offset)
         imm_bin = to_binary(imm, 13)
         imm_reordered = imm_bin[0] + imm_bin[2:8] + imm_bin[8:12] + imm_bin[1] + "0"
         return f"{imm_reordered} {reg_encoding[rs2]} {reg_encoding[rs1]} {self.f3} {self.opcode}"
@@ -140,6 +143,5 @@ def assemble(filename):
 if __name__ == "__main__":
     assemble('test.txt')
 
-    
 
     
