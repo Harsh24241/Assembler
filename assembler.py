@@ -1,12 +1,4 @@
 import re
-def to_twos_complement(n, bits):
-    if n >= 0:
-        # Positive numbers, use bin and remove the '0b' prefix
-        return bin(n)[2:].zfill(bits)
-    else:
-        # For negative numbers, apply two's complement
-        return bin((1 << bits) + n)[2:].zfill(bits)
-
 
 def to_twos_complement(n, bits):
     if n >= 0:
@@ -144,7 +136,6 @@ def read_assembly(filename):
     labels={}
     with open(filename,"r") as f:
         l=[x.rstrip() for x in f.read().split("\n")]
-<<<<<<< HEAD
 
     #replacing label in the list with immediate values    
     for i in range(len(l)):
@@ -158,8 +149,6 @@ def read_assembly(filename):
         if(a[-1] in labels):
             a[-1]=str((labels[a[-1]]-i)*4)
             l[i]=','.join(a)
-=======
->>>>>>> 11087e77f325be95057833950aa3269fefbdb60c
     
         
                
@@ -189,11 +178,7 @@ def read_assembly(filename):
 
     print(ans)
 
-<<<<<<< HEAD
 read_assembly("Ex_test_10.txt")
-=======
-read_assembly("Ex_test_1.txt")
->>>>>>> 11087e77f325be95057833950aa3269fefbdb60c
 
 
 
