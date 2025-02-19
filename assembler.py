@@ -144,7 +144,8 @@ def read_assembly(filename):
             a=Btype(i)
             ans+=a.code()
 
-    print(ans,":binary code")
+    for idx, code in enumerate(binary_codes):
+        print(f"Instruction {idx+1}: {code}")
 
 read_assembly("test.txt")
 
