@@ -1,19 +1,27 @@
 import re
+def to_twos_complement(n, bits):
+    if n >= 0:
+        # Positive numbers, use bin and remove the '0b' prefix
+        return bin(n)[2:].zfill(bits)
+    else:
+        # For negative numbers, apply two's complement
+        return bin((1 << bits) + n)[2:].zfill(bits)
+
 
 class Rtype:
-    encoding={f"x{i}": format(i, '05b') for i in range(0,32)}|{"zero":"00000","ra":"00001","sp":"00010","gp":"00011","tp":"00100","t0":"00101","t1":"00110","t2":"00111","s0":"01000","fp":"01000","s1":"01001","a0":"01010","a1":"01011"}|{f"a{i-10}": format(i, '05b') for i in range(12,18)}|{f"s{i-16}": format(i, '05b') for i in range(18,28)}|{f"t{i-25}": format(i, '05b') for i in range(28,32)}
+    encoding={f"x{i}": to_twos_complement(i, 5) for i in range(0,32)}|{"zero":"00000","ra":"00001","sp":"00010","gp":"00011","tp":"00100","t0":"00101","t1":"00110","t2":"00111","s0":"01000","fp":"01000","s1":"01001","a0":"01010","a1":"01011"}|{f"a{i-10}": to_twos_complement(i, 5) for i in range(12,18)}|{f"s{i-16}": to_twos_complement(i, 5) for i in range(18,28)}|{f"t{i-25}": to_twos_complement(i, 5) for i in range(28,32)}
     
-    f3={"add":"000","sub":"000","and":"010","or":"101","slt":"110","srl":"111"}
+    f3={"add":"000","sub":"000","and":"111","or":"110","slt":"010","srl":"101"}
     f7={"add":"0000000","sub":"0100000","and":"0000000","or":"0000000","slt":"0000000","srl":"0000000"}
     def __init__(self,line ):
         self.inst=line
     def code(self):
         l = re.split(r'[ ,]+', self.inst)
-        out=f"{self.f7[l[0]]} {self.encoding[l[3]]} {self.encoding[l[2]]} {self.f3[l[0]]} {self.encoding[l[1]]} 0110011"
+        out=f"{self.f7[l[0]]}{self.encoding[l[3]]}{self.encoding[l[2]]}{self.f3[l[0]]}{self.encoding[l[1]]}0110011"
         return out
         
 class I1type:
-    encoding={f"x{i}": format(i, '05b') for i in range(0,32)}|{"zero":"00000","ra":"00001","sp":"00010","gp":"00011","tp":"00100","t0":"00101","t1":"00110","t2":"00111","s0":"01000","fp":"01000","s1":"01001","a0":"01010","a1":"01011"}|{f"a{i-10}": format(i, '05b') for i in range(12,18)}|{f"s{i-16}": format(i, '05b') for i in range(18,28)}|{f"t{i-25}": format(i, '05b') for i in range(28,32)}
+    encoding={f"x{i}": to_twos_complement(i, 5) for i in range(0,32)}|{"zero":"00000","ra":"00001","sp":"00010","gp":"00011","tp":"00100","t0":"00101","t1":"00110","t2":"00111","s0":"01000","fp":"01000","s1":"01001","a0":"01010","a1":"01011"}|{f"a{i-10}": to_twos_complement(i, 5) for i in range(12,18)}|{f"s{i-16}": to_twos_complement(i, 5) for i in range(18,28)}|{f"t{i-25}": to_twos_complement(i, 5) for i in range(28,32)}
     
     f3={"addi":"000","jalr":"000","lw":"010"}
     opcode={"addi":"0010011","jalr":"1100111","lw":"0000011"}
@@ -22,10 +30,12 @@ class I1type:
         self.line=line
     def code(self):
         l= re.split(r'[ ,]+',self.line)
-        imm=format(int(l[3]),'012b')
-        out=f"{imm} {encoding[l[2]]} {f3[l[0]]} {encoding[l[1]]} {opcode[l[0]]}"
+        imm=to_twos_complement(int(l[3]),12)
+        out=f"{imm}{self.encoding[l[2]]}{self.f3[l[0]]}{self.encoding[l[1]]}{self.opcode[l[0]]}"
+        return out
+
 class I2type:
-    encoding={f"x{i}": format(i, '05b') for i in range(0,32)}|{"zero":"00000","ra":"00001","sp":"00010","gp":"00011","tp":"00100","t0":"00101","t1":"00110","t2":"00111","s0":"01000","fp":"01000","s1":"01001","a0":"01010","a1":"01011"}|{f"a{i-10}": format(i, '05b') for i in range(12,18)}|{f"s{i-16}": format(i, '05b') for i in range(18,28)}|{f"t{i-25}": format(i, '05b') for i in range(28,32)}
+    encoding={f"x{i}": to_twos_complement(i, 5) for i in range(0,32)}|{"zero":"00000","ra":"00001","sp":"00010","gp":"00011","tp":"00100","t0":"00101","t1":"00110","t2":"00111","s0":"01000","fp":"01000","s1":"01001","a0":"01010","a1":"01011"}|{f"a{i-10}": to_twos_complement(i, 5) for i in range(12,18)}|{f"s{i-16}": to_twos_complement(i, 5) for i in range(18,28)}|{f"t{i-25}": to_twos_complement(i, 5) for i in range(28,32)}
     
     f3={"addi":"000","jalr":"000","lw":"010"}
     opcode={"addi":"0010011","jalr":"1100111","lw":"0000011"}
@@ -34,11 +44,12 @@ class I2type:
         self.line=line
     def code(self):
         l=re.split(r'[ ,()]+',self.line)
-        imm=format(int(l[2]),'012b')
-        out=f"{imm} {encoding[l[3]]} {f3[l[0]]} {encoding[l[1]]} {opcode[l[0]]}"
+        imm=to_twos_complement(int(l[2]),12)
+        out=f"{imm}{self.encoding[l[3]]}{self.f3[l[0]]}{self.encoding[l[1]]}{self.opcode[l[0]]}"
+        return out
         
 class Stype:
-    encoding={f"x{i}": format(i, '05b') for i in range(0,32)}|{"zero":"00000","ra":"00001","sp":"00010","gp":"00011","tp":"00100","t0":"00101","t1":"00110","t2":"00111","s0":"01000","fp":"01000","s1":"01001","a0":"01010","a1":"01011"}|{f"a{i-10}": format(i, '05b') for i in range(12,18)}|{f"s{i-16}": format(i, '05b') for i in range(18,28)}|{f"t{i-25}": format(i, '05b') for i in range(28,32)}
+    encoding={f"x{i}": to_twos_complement(i, 5) for i in range(0,32)}|{"zero":"00000","ra":"00001","sp":"00010","gp":"00011","tp":"00100","t0":"00101","t1":"00110","t2":"00111","s0":"01000","fp":"01000","s1":"01001","a0":"01010","a1":"01011"}|{f"a{i-10}": to_twos_complement(i, 5) for i in range(12,18)}|{f"s{i-16}": to_twos_complement(i, 5) for i in range(18,28)}|{f"t{i-25}": to_twos_complement(i, 5) for i in range(28,32)}
     
     opcode={"sw":"0100011"}
     f3={"sw":"010"}
@@ -46,13 +57,15 @@ class Stype:
     def __init__(self,line ):
         self.line=line
     def code(self):
-        l=re.split(r'[ ,()]+',self.line)
-        imm=format(int(l[2]),'012b')
-        out=f"{imm[:]} {encoding[l[-1]]} 010 {imm[:]} 0100011"
+        l=[x for x in re.split(r'[ ,()]+',self.line) if x]
+
+        imm=to_twos_complement(int(l[2]),12)
+        out=f"{imm[:7]}{self.encoding[l[1]]}{self.encoding[l[-1]]}010{imm[7:]}0100011"
+        return out
 
 
 class Btype:
-    encoding={f"x{i}": format(i, '05b') for i in range(0,32)}|{"zero":"00000","ra":"00001","sp":"00010","gp":"00011","tp":"00100","t0":"00101","t1":"00110","t2":"00111","s0":"01000","fp":"01000","s1":"01001","a0":"01010","a1":"01011"}|{f"a{i-10}": format(i, '05b') for i in range(12,18)}|{f"s{i-16}": format(i, '05b') for i in range(18,28)}|{f"t{i-25}": format(i, '05b') for i in range(28,32)}
+    encoding={f"x{i}": to_twos_complement(i, 5) for i in range(0,32)}|{"zero":"00000","ra":"00001","sp":"00010","gp":"00011","tp":"00100","t0":"00101","t1":"00110","t2":"00111","s0":"01000","fp":"01000","s1":"01001","a0":"01010","a1":"01011"}|{f"a{i-10}": to_twos_complement(i, 5) for i in range(12,18)}|{f"s{i-16}": to_twos_complement(i, 5) for i in range(18,28)}|{f"t{i-25}": to_twos_complement(i, 5) for i in range(28,32)}
     
     f3={"beq":"000","bne":"001","blt":"100"}
     opcode={"beq":"1100011","bne":"1100011","blt":"1100011"}
@@ -60,20 +73,22 @@ class Btype:
         self.line=line
     def code(self):
         l=re.split(r'[ ,]+',self.line)
-        imm=format(int(l[3]),'012b')
-        out=f"{imm[:]} {encoding[l[2]]} {encoding[l[1]]} {f3[l[0]]} {imm[:]} 1100011"
+        imm=to_twos_complement(int(l[3]),12)
+        out=f"{imm[:7]}{self.encoding[l[2]]}{self.encoding[l[1]]}{self.f3[l[0]]}{imm[7:]}1100011"
+        return out
 
 
 class Jtype:
-    encoding={f"x{i}": format(i, '05b') for i in range(0,32)}|{"zero":"00000","ra":"00001","sp":"00010","gp":"00011","tp":"00100","t0":"00101","t1":"00110","t2":"00111","s0":"01000","fp":"01000","s1":"01001","a0":"01010","a1":"01011"}|{f"a{i-10}": format(i, '05b') for i in range(12,18)}|{f"s{i-16}": format(i, '05b') for i in range(18,28)}|{f"t{i-25}": format(i, '05b') for i in range(28,32)}
+    encoding={f"x{i}": to_twos_complement(i, 5) for i in range(0,32)}|{"zero":"00000","ra":"00001","sp":"00010","gp":"00011","tp":"00100","t0":"00101","t1":"00110","t2":"00111","s0":"01000","fp":"01000","s1":"01001","a0":"01010","a1":"01011"}|{f"a{i-10}": to_twos_complement(i, 5) for i in range(12,18)}|{f"s{i-16}": to_twos_complement(i, 5) for i in range(18,28)}|{f"t{i-25}": to_twos_complement(i, 5) for i in range(28,32)}
     
     opcode={"jal":"1101111"}
     def __init__(self,line ):
         self.line=line
     def code(self):
-        l=re.split(r'[ ,()]+',self.line)
-        imm=format(int(l[2]),'012b')
-        out=f"{imm[:]} {encoding[l[-1]]} 010 {imm[:]} 0100011"
+        l=[x for x in re.split(r'[ ,()]+',self.line) if x]
+        imm=to_twos_complement(int(l[2]),20)
+        out=f"{imm}{self.encoding[l[1]]}1101111"
+        return out
 
 
 
@@ -121,7 +136,6 @@ def debug(l):
 def read_assembly(filename):
     with open(filename,"r") as f:
         l=[x.rstrip() for x in f.read().split("\n")]
-        print(l)
     
     errors=debug(l)
     for i in errors:print(i)
@@ -130,24 +144,26 @@ def read_assembly(filename):
     for i in l:
         if(identity(i)=="R"):
             a=Rtype(i)
-            ans+=a.code()
-        elif(identity(i)=="I"):
-            a=Itype(i)
-            ans+=a.code()
+            ans+=a.code()+"\n"
+        elif(identity(i)=="I1"):
+            a=I1type(i)
+            ans+=a.code()+"\n"
+        elif(identity(i)=="I2"):
+            a=I2type(i)
+            ans+=a.code()+"\n"
         elif(identity(i)=="S"):
             a=Stype(i)
-            ans+=a.code()
+            ans+=a.code()+"\n"
         elif(identity(i)=="J"):
             a=Jtype(i)
-            ans+=a.code()
+            ans+=a.code()+"\n"
         elif(identity(i)=="B"):
             a=Btype(i)
-            ans+=a.code()
+            ans+=a.code()+"\n"
 
-    for idx, code in enumerate(binary_codes):
-        print(f"Instruction {idx+1}: {code}")
+    print(ans)
 
-read_assembly("test.txt")
+read_assembly("Ex_test_1.txt")
 
 
 
