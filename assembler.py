@@ -74,8 +74,11 @@ class Jtype(Instruction):
     opcode = "1101111"
     def code(self):
         tokens = re.split(r'[ ,]+', self.inst)
-        rd, label = tokens[1], tokens[2]
-        imm = self.labels[label] - self.current_pc
+        rd, offset = tokens[1], tokens[2]
+        if offset in self.labels:
+            imm = self.labels[offset] - self.current_pc
+        else:
+            imm = int(offset)
         imm_bin = to_binary(imm, 21)
         imm_reordered = imm_bin[0] + imm_bin[10:20] + imm_bin[9] + imm_bin[1:9] + "0"
         return f"{imm_reordered} {reg_encoding[rd]} {self.opcode}"
@@ -142,6 +145,3 @@ def assemble(filename):
 
 if __name__ == "__main__":
     assemble('test.txt')
-
-
-    
