@@ -22,7 +22,8 @@ class I1type:
         self.line=line
     def code(self):
         l= re.split(r'[ ,]+',self.line)
-        out=f""
+        imm=format(int(l[3]),'012b')
+        out=f"{imm} {encoding[l[2]]} {f3[l[0]]} {encoding[l[1]]} {opcode[l[0]]}"
 class I2type:
     encoding={f"x{i}": format(i, '05b') for i in range(0,32)}|{"zero":"00000","ra":"00001","sp":"00010","gp":"00011","tp":"00100","t0":"00101","t1":"00110","t2":"00111","s0":"01000","fp":"01000","s1":"01001","a0":"01010","a1":"01011"}|{f"a{i-10}": format(i, '05b') for i in range(12,18)}|{f"s{i-16}": format(i, '05b') for i in range(18,28)}|{f"t{i-25}": format(i, '05b') for i in range(28,32)}
     
@@ -34,7 +35,7 @@ class I2type:
     def code(self):
         l=re.split(r'[ ,()]+',self.line)
         imm=format(int(l[2]),'012b')
-        out=f"{imm[:8]} {encoding[l[-1]]} 010 {imm[8:]} 0100011"
+        out=f"{imm} {encoding[l[3]]} {f3[l[0]]} {encoding[l[1]]} {opcode[l[0]]}"
         
 class Stype:
     encoding={f"x{i}": format(i, '05b') for i in range(0,32)}|{"zero":"00000","ra":"00001","sp":"00010","gp":"00011","tp":"00100","t0":"00101","t1":"00110","t2":"00111","s0":"01000","fp":"01000","s1":"01001","a0":"01010","a1":"01011"}|{f"a{i-10}": format(i, '05b') for i in range(12,18)}|{f"s{i-16}": format(i, '05b') for i in range(18,28)}|{f"t{i-25}": format(i, '05b') for i in range(28,32)}
@@ -47,7 +48,7 @@ class Stype:
     def code(self):
         l=re.split(r'[ ,()]+',self.line)
         imm=format(int(l[2]),'012b')
-        out=f"{imm[:8]} {encoding[l[-1]]} 010 {imm[8:]} 0100011"
+        out=f"{imm[:]} {encoding[l[-1]]} 010 {imm[:]} 0100011"
 
 
 class Btype:
@@ -60,7 +61,7 @@ class Btype:
     def code(self):
         l=re.split(r'[ ,]+',self.line)
         imm=format(int(l[3]),'012b')
-        out=f"{imm[:8]} {encoding[l[-1]]} 010 {imm[8:]} 1100011"
+        out=f"{imm[:]} {encoding[l[2]]} {encoding[l[1]]} {f3[l[0]]} {imm[:]} 1100011"
 
 
 class Jtype:
@@ -72,7 +73,7 @@ class Jtype:
     def code(self):
         l=re.split(r'[ ,()]+',self.line)
         imm=format(int(l[2]),'012b')
-        out=f"{imm[:8]} {encoding[l[-1]]} 010 {imm[8:]} 0100011"
+        out=f"{imm[:]} {encoding[l[-1]]} 010 {imm[:]} 0100011"
 
 
 
