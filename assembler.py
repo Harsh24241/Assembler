@@ -73,7 +73,8 @@ class Btype:
     def code(self):
         l=re.split(r'[ ,]+',self.line)
         imm=to_twos_complement(int(l[3]),12)
-        out=f"{imm[:7]}{self.encoding[l[2]]}{self.encoding[l[1]]}{self.f3[l[0]]}{imm[7:]}1100011"
+
+        out=f"{imm[0]}{imm[2:8]}{self.encoding[l[2]]}{self.encoding[l[1]]}{self.f3[l[0]]}{imm[8:]}{imm[1]}1100011"
         return out
 
 
@@ -136,19 +137,22 @@ def read_assembly(filename):
     labels={}
     with open(filename,"r") as f:
         l=[x.rstrip() for x in f.read().split("\n")]
+        #print(l)
 
     #replacing label in the list with immediate values    
     for i in range(len(l)):
         if(":" in l[i]):
             a=l[i].split(":")
-            labels[a[0]]=i
+            labels[a[0]]=i*4
             l[i]=a[1].strip()
+            #print(l)
             
     for i in range(len(l)):
         a=l[i].split(',')
         if(a[-1] in labels):
-            a[-1]=str((labels[a[-1]]-i)*4)
+            a[-1]=str((labels[a[-1]]-4*i)//2)
             l[i]=','.join(a)
+            #print(l)
     
         
                
@@ -178,7 +182,10 @@ def read_assembly(filename):
 
     print(ans)
 
-read_assembly("Ex_test_10.txt")
+
+filepath=input("enter filename:")
+
+read_assembly(filepath)
 
 
 
